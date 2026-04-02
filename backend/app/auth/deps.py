@@ -57,14 +57,14 @@ async def get_current_user(
     return user
 
 
-async def require_role(*allowed_roles: str):
+def require_role(*allowed_roles: str):
     """
     Dependency factory that creates a role checker.
 
     Usage:
     @router.get("/endpoint")
     async def endpoint(current_user: User = Depends(require_role("VIEWER", "ANALYST"))):
-        ...
+    ...
     """
     async def role_checker(current_user: User = Depends(get_current_user)) -> User:
         if current_user.role not in allowed_roles:

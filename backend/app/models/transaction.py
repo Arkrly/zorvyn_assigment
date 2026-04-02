@@ -67,6 +67,16 @@ class Transaction(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    created_by: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("users.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("users.id"),
+        nullable=True,
+    )
 
     def __repr__(self) -> str:
         return f"<Transaction(id={self.id}, user_id={self.user_id}, amount={self.amount}, type={self.type})>"
