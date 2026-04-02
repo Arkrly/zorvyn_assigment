@@ -13,8 +13,11 @@ async def health_check():
 
 
 # Import routers here for future expansion
-# from app.routers import auth, users, transactions, dashboard
-# app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+from app.auth import router as auth_router
+
+app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
+
+# from app.routers import users, transactions, dashboard
 # app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 # app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["transactions"])
 # app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
