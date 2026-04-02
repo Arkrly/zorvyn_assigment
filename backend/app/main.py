@@ -23,5 +23,7 @@ from app.routers import transactions, users
 app.include_router(transactions.router, tags=["transactions"])
 app.include_router(users.router, tags=["users"])
 
-# from app.routers import dashboard
-# app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
+# Dashboard router
+from app.routers import dashboard_router
+
+app.include_router(dashboard_router, tags=["dashboard"])
