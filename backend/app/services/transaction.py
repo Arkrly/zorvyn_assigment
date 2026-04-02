@@ -8,6 +8,7 @@ from app.models.transaction import Transaction
 from app.models.user import User
 from app.auth.deps import Role
 from app.schemas.transaction import TransactionCreate, TransactionUpdate
+from app.db.utils import PaginatedResponse, paginate
 
 
 async def create_transaction(
@@ -108,3 +109,47 @@ async def delete_transaction(
     transaction.is_deleted = True
     transaction.updated_by = current_user.id
     await db.commit()
+
+
+async def list_transactions(
+    db: AsyncSession,
+    current_user: User,
+    type_filter: Optional[str] = None,
+    date_from: Optional[datetime] = None,
+    date_to: Optional[datetime] = None,
+    sort_by: str = "date",
+    order: str = "asc",
+    page: int = 1,
+    page_size: int = 20,
+) -> PaginatedResponse[Transaction]:
+    """
+    List transactions with role-based filtering, pagination, and sorting.
+
+    VIEWER: sees only own transactions (filtered by user_id).
+    ANALYST/ADMIN: sees all transactions (no filter).
+    """
+    # Build base query
+    query = select(Transaction)
+
+    # Ownership filter - VIEWER sees only own transactions
+    if current_user.role == Role.VIEWER:
+        query = query.where(Transaction.user_id == current_user.id)
+    # ANALYST/ADMIN see all (no additional filter)
+
+    # Apply filters
+    if type_filter:
+        query = query.where(Transaction.type == type_filter)
+    if date_from:
+        query = query.where(Transaction.date >= date_from)
+    if date_to:
+        query = query.where(Transaction.date <= date_to)
+
+    # Apply sorting
+    sort_column = Transaction.date if sort_by == "date" else Transaction.amount
+    if order == "desc":
+        query = query.order_by(sort_column.desc())
+    else:
+        query = query.order_by(sort_column.asc())
+
+    # Use pagination utility
+    return await paginate(db, query, page, page_size)
