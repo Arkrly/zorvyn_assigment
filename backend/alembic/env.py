@@ -12,6 +12,8 @@ from alembic import context
 # Import Base and models to populate metadata
 from app.core.config import settings
 from app.db.base import Base
+from app.models.user import User
+from app.models.transaction import Transaction
 
 # This is the Alembic Config object
 config = context.config
