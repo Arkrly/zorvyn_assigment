@@ -32,31 +32,89 @@ FinanceBoard is a RESTful API for managing financial transactions with built-in 
 
 ## Quick Start
 
-### Local Development
+### 1. Clone and Install
 
 ```bash
 cd backend
 cp .env.example .env
-# Add SECRET_KEY to .env (generate with: openssl rand -hex 32)
+# Edit .env and add SECRET_KEY (generate with: openssl rand -hex 32)
 pip install -e ".[dev]"
+```
+
+### 2. Database Setup
+
+```bash
+# Run migrations
 alembic upgrade head
+```
+
+### 3. Run the App
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-### Docker (PostgreSQL only)
+The API will be available at `http://localhost:8000`
+
+### Docker (PostgreSQL)
 
 ```bash
 docker-compose up -d
+# Then update DATABASE_URL in .env to use PostgreSQL
+alembic upgrade head
 ```
 
-### Environment Variables
+## Environment Variables
 
 Create `backend/.env`:
 
-```env
-DATABASE_URL=sqlite+aiosqlite:///./dev.db
-SECRET_KEY=your-secret-key-min-32-chars-long-here
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | SQLite (dev) or PostgreSQL (prod) connection string |
+| `SECRET_KEY` | Yes | JWT signing key (generate with `openssl rand -hex 32`) |
+| `ALGORITHM` | No | JWT algorithm (default: HS256) |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | No | Access token expiry (default: 30) |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | No | Refresh token expiry (default: 7) |
+| `DEBUG` | No | Debug mode (default: false) |
+
+## Deployment
+
+### Render.com (Free Tier)
+
+1. **Create a PostgreSQL database** on Render
+   - Go to Dashboard > New > PostgreSQL
+   - Note the connection string
+
+2. **Deploy the API**
+   - Dashboard > New > Web Service
+   - Connect your GitHub repository
+   - Build command: `pip install -e .[dev]`
+   - Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+
+3. **Set environment variables**
+   - Add all variables from `.env.example`
+   - Use the PostgreSQL connection string for `DATABASE_URL`
+   - Generate a new `SECRET_KEY` for production
+
+### Railway
+
+1. **Create a Railway project**
+   - Add PostgreSQL plugin
+
+2. **Deploy**
+   - Connect GitHub repository
+   - Set environment variables in Railway dashboard
+   - Deploy
+
+### Fly.io
+
+1. **Install flyctl** and authenticate
+2. **Create app**: `fly launch`
+3. **Add PostgreSQL**: `fly postgres attach`
+4. **Deploy**: `fly deploy`
+
+> [!NOTE]
+> Update `DATABASE_URL` to use the PostgreSQL connection string provided by your hosting platform.
 
 ## API Endpoints
 
