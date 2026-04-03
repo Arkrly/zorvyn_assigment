@@ -20,16 +20,24 @@ def _exclude_deleted_criteria(entity):
     return True
 
 
-# Use NullPool for SQLite compatibility
+# Use NullPool for SQLite, asyncpg for PostgreSQL
 if settings.DATABASE_URL.startswith("sqlite"):
     engine: AsyncEngine = create_async_engine(
         settings.DATABASE_URL,
         echo=settings.DEBUG,
         poolclass=NullPool,
     )
-else:
+elif "+asyncpg" in settings.DATABASE_URL:
     engine = create_async_engine(
         settings.DATABASE_URL,
+        echo=settings.DEBUG,
+        pool_pre_ping=True,
+    )
+else:
+    # Convert postgresql:// to postgresql+asyncpg://
+    async_url = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
+    engine = create_async_engine(
+        async_url,
         echo=settings.DEBUG,
         pool_pre_ping=True,
     )
